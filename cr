@@ -95,7 +95,7 @@ edit_config() {
         return
     fi
 
-    ${EDITOR:-nano} "$CONFIG_FILE"
+    ${EDITOR:-vim} "$CONFIG_FILE"
     echo -e "${GREEN}Configuration updated${NC}"
 }
 
