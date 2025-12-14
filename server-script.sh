@@ -20,15 +20,43 @@ echo "Client user: $CLIENT_USER"
 echo "Project directory: $PROJECT_DIR"
 echo ""
 
+# Function to check if mount is healthy
+is_mount_healthy() {
+    local mount_point="$1"
+    # Try to stat the mount point with a timeout
+    # If this hangs or fails, the mount is stale
+    timeout 2 stat "$mount_point" > /dev/null 2>&1
+    return $?
+}
+
+# Function to force unmount stale mounts
+force_unmount() {
+    local mount_point="$1"
+    echo "Cleaning up stale mount..."
+    # Try fusermount first (for FUSE filesystems), then fall back to umount -f
+    fusermount -uz "$mount_point" 2>/dev/null || umount -f "$mount_point" 2>/dev/null
+    sleep 1
+}
+
 # Create mount point if it doesn't exist
 mkdir -p "$MOUNT_POINT"
 
-# Check if already mounted
+# Check if already mounted and if so, verify it's healthy
 ALREADY_MOUNTED=false
 if mountpoint -q "$MOUNT_POINT"; then
-    echo "Client filesystem already mounted at $MOUNT_POINT"
-    ALREADY_MOUNTED=true
-else
+    echo "Checking existing mount at $MOUNT_POINT..."
+    if is_mount_healthy "$MOUNT_POINT"; then
+        echo "Client filesystem already mounted and healthy"
+        ALREADY_MOUNTED=true
+    else
+        echo "Stale mount detected, cleaning up..."
+        force_unmount "$MOUNT_POINT"
+        ALREADY_MOUNTED=false
+    fi
+fi
+
+# Mount if not already mounted (or if we just cleaned up a stale mount)
+if [ "$ALREADY_MOUNTED" = false ]; then
     echo "Mounting client filesystem via reverse tunnel..."
     # Mount client filesystem through the reverse tunnel (localhost:2222 -> client:22)
     # -o StrictHostKeyChecking=no: Don't prompt for host key (it's localhost via tunnel)
