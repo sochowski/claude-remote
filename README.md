@@ -50,6 +50,23 @@ ssh-copy-id user@server.com
 eval $(ssh-agent) && ssh-add
 ```
 
+## Reset/Cleanup
+
+If you encounter hanging mounts or stale connections, use the reset script:
+
+**From client:**
+```bash
+chmod +x client-reset.sh
+SERVER_HOST=your-server.com ./client-reset.sh
+```
+
+**Or directly on server:**
+```bash
+claude-remote-reset
+```
+
+This will forcibly unmount `~/claude-remote-mount` and clean up any related processes.
+
 ## Troubleshooting
 
 **Mount fails**: Make sure SSH server is running on client
@@ -57,6 +74,8 @@ eval $(ssh-agent) && ssh-add
 sudo systemctl start sshd  # Linux
 sudo systemsetup -setremotelogin on  # macOS
 ```
+
+**Hanging/stale mount**: Use the reset script (see above)
 
 **claude not found**: Install Claude Code on server
 

@@ -32,12 +32,15 @@ fi
 # Create ~/bin directory if it doesn't exist
 mkdir -p "$HOME/bin"
 
-# Copy server script to ~/bin
+# Copy server scripts to ~/bin
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cp "$SCRIPT_DIR/server-script.sh" "$HOME/bin/claude-remote-server"
+cp "$SCRIPT_DIR/server-reset.sh" "$HOME/bin/claude-remote-reset"
 chmod +x "$HOME/bin/claude-remote-server"
+chmod +x "$HOME/bin/claude-remote-reset"
 
 echo "Installed claude-remote-server to ~/bin/claude-remote-server"
+echo "Installed claude-remote-reset to ~/bin/claude-remote-reset"
 
 # Check if ~/bin is in PATH
 if [[ ":$PATH:" != *":$HOME/bin:"* ]]; then
