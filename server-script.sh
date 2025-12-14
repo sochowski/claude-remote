@@ -20,6 +20,14 @@ echo "Client user: $CLIENT_USER"
 echo "Project directory: $PROJECT_DIR"
 echo ""
 
+# Function to check if mount is active (without hanging)
+is_mounted() {
+    local mount_point="$1"
+    # Check /proc/mounts instead of using mountpoint command
+    # This won't hang even if the mount is stale
+    grep -qs " ${mount_point} " /proc/mounts
+}
+
 # Function to check if mount is healthy
 is_mount_healthy() {
     local mount_point="$1"
@@ -43,7 +51,7 @@ mkdir -p "$MOUNT_POINT"
 
 # Check if already mounted and if so, verify it's healthy
 ALREADY_MOUNTED=false
-if mountpoint -q "$MOUNT_POINT"; then
+if is_mounted "$MOUNT_POINT"; then
     echo "Checking existing mount at $MOUNT_POINT..."
     if is_mount_healthy "$MOUNT_POINT"; then
         echo "Client filesystem already mounted and healthy"
