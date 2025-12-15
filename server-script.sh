@@ -110,5 +110,8 @@ echo "Starting Claude Code on client directory: $PROJECT_DIR"
 echo "---"
 echo ""
 
+# Clear the terminal before starting Claude
+clear
+
 # Run Claude Code with context about the remote setup
 exec claude --append-system-prompt "You are running on a remote server with files mounted from the client machine via SSHFS over a reverse SSH tunnel. All commands you execute run on the server. The files you're editing are on the client's filesystem through the SSHFS mount at $MOUNT_POINT. To run commands directly on the client machine, you would need to SSH to it (client accessible via localhost:2222 during this session)."
