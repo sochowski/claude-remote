@@ -26,6 +26,8 @@ cr - Claude Remote CLI
 
 Usage:
   cr [project_dir]          Connect to remote server (default: current directory)
+  cr -s, --ssh              SSH only (no Claude session, no reverse mount)
+  cr -n, --no-mount         Skip reverse mount and start Claude on server
   cr -r, --reset            Reset/cleanup remote mount
   cr -c, --config           Edit configuration
   cr -h, --help             Show this help
@@ -39,6 +41,8 @@ Configuration:
 Examples:
   cr                        # Connect with current directory
   cr ~/myproject            # Connect with specific directory
+  cr -s                     # Just SSH to server
+  cr -n ~/serverproject     # Run Claude on server files (no mount)
   cr -r                     # Reset stale mount
 EOF
 }
@@ -180,10 +184,62 @@ reset() {
     fi
 }
 
+# Simple SSH connection (no Claude, no reverse mount)
+ssh_only() {
+    load_config
+
+    echo -e "${GREEN}Connecting to $SERVER_USER@$SERVER_HOST (SSH only)...${NC}"
+    echo ""
+
+    # Use sshpass if password is configured
+    if [ -n "$PASSWORD" ]; then
+        if ! command -v sshpass &> /dev/null; then
+            echo -e "${YELLOW}Warning: sshpass not installed, password will be ignored${NC}"
+            exec ssh "$SERVER_USER@$SERVER_HOST"
+        else
+            export SSHPASS="$PASSWORD"
+            exec sshpass -e ssh "$SERVER_USER@$SERVER_HOST"
+        fi
+    else
+        exec ssh "$SERVER_USER@$SERVER_HOST"
+    fi
+}
+
+# Connect without reverse mount (run Claude on server files)
+connect_no_mount() {
+    local project_dir="${1:-\$HOME}"
+
+    load_config
+
+    echo -e "${GREEN}Connecting to $SERVER_USER@$SERVER_HOST (no mount)...${NC}"
+    echo "Working directory: $project_dir"
+    echo ""
+
+    # Use sshpass if password is configured
+    if [ -n "$PASSWORD" ]; then
+        if ! command -v sshpass &> /dev/null; then
+            echo -e "${YELLOW}Warning: sshpass not installed, password will be ignored${NC}"
+            exec ssh -t "$SERVER_USER@$SERVER_HOST" "cd '$project_dir' && exec \$SHELL -l"
+        else
+            export SSHPASS="$PASSWORD"
+            exec sshpass -e ssh -t "$SERVER_USER@$SERVER_HOST" "cd '$project_dir' && exec \$SHELL -l"
+        fi
+    else
+        exec ssh -t "$SERVER_USER@$SERVER_HOST" "cd '$project_dir' && exec \$SHELL -l"
+    fi
+}
+
 # Main command dispatcher
 case "${1:-}" in
     -h|--help)
         show_help
+        ;;
+    -s|--ssh)
+        ssh_only
+        ;;
+    -n|--no-mount)
+        shift
+        connect_no_mount "$1"
         ;;
     -r|--reset)
         reset
