@@ -1,6 +1,6 @@
 # Claude Remote
 
-Run Claude Code on a remote server while editing local files.
+Run Claude Code on a remote server while editing local files. My laptop doesn't meet the hardware requirements for Claude Code.
 
 ## Installation
 
