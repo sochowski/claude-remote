@@ -6,7 +6,7 @@ Run Claude Code on a remote server while editing local files. My laptop doesn't 
 
 **Server:**
 ```bash
-./setup-server.sh
+./scripts/setup-server.sh
 ```
 
 **Client:**

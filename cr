@@ -149,13 +149,13 @@ connect() {
             echo -e "${YELLOW}Warning: sshpass not installed, password will be ignored${NC}"
             echo "Install with: sudo apt install sshpass (or brew install sshpass on macOS)"
             echo ""
-            exec "$SCRIPT_DIR/client-connect.sh" "$project_dir"
+            exec "$SCRIPT_DIR/scripts/client-connect.sh" "$project_dir"
         else
             export SSHPASS="$PASSWORD"
-            exec sshpass -e "$SCRIPT_DIR/client-connect.sh" "$project_dir"
+            exec sshpass -e "$SCRIPT_DIR/scripts/client-connect.sh" "$project_dir"
         fi
     else
-        exec "$SCRIPT_DIR/client-connect.sh" "$project_dir"
+        exec "$SCRIPT_DIR/scripts/client-connect.sh" "$project_dir"
     fi
 }
 
@@ -174,13 +174,13 @@ reset() {
     if [ -n "$PASSWORD" ]; then
         if ! command -v sshpass &> /dev/null; then
             echo -e "${YELLOW}Warning: sshpass not installed, password will be ignored${NC}"
-            exec "$SCRIPT_DIR/client-reset.sh"
+            exec "$SCRIPT_DIR/scripts/client-reset.sh"
         else
             export SSHPASS="$PASSWORD"
-            exec sshpass -e "$SCRIPT_DIR/client-reset.sh"
+            exec sshpass -e "$SCRIPT_DIR/scripts/client-reset.sh"
         fi
     else
-        exec "$SCRIPT_DIR/client-reset.sh"
+        exec "$SCRIPT_DIR/scripts/client-reset.sh"
     fi
 }
 
